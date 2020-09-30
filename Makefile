@@ -1,0 +1,3 @@
+.PHONY: test-unit
+test-unit: ## Executes all unit tests.
+	@go test -race -covermode=atomic -coverprofile .coverprofile ./...
