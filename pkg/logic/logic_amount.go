@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 )
 
 const (
+	url0 = "https://httpstat.us/200?sleep=50"
 	url1 = "https://httpstat.us/200?sleep=5000"
 	url2 = "https://httpstat.us/400?sleep=5000"
 )
@@ -57,6 +59,8 @@ func generateRandomNo(min, max int) int {
 
 // makeGETRequest Helper makes GET request and returns HTTP code.
 func makeGETRequest(url string) (int, error) {
+	log.Println("making GET request for: ", url)
+
 	resp, errGet := http.Get(url)
 	if errGet != nil {
 		return 0, errGet
