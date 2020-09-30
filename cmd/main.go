@@ -49,7 +49,12 @@ func handlerDecisions(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
 	}
 
-	return c.JSON(http.StatusOK, map[string]bool{"decision": logic.DecisionAmount(model.Amount)})
+	decision, errDecision := logic.DecisionAmount(model.Amount)
+	if errDecision != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errDecision.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]bool{"decision": decision})
 }
 
 // handlerDecisionsInDB ...
