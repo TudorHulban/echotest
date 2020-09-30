@@ -39,5 +39,16 @@ func TestHandlerPost(t *testing.T) {
 }
 
 func TestHandlerGet(t *testing.T) {
+	e := echo.New()
+	addRoutes(e)
 
+	apitest.New().
+		Handler(e).
+		Method(http.MethodGet).
+		JSON(`{"name": "x", "amount":"100"}`).
+		URL(url).
+		Expect(t).
+		Status(http.StatusOK).
+		Body("").
+		End()
 }
