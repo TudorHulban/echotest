@@ -8,9 +8,10 @@ COPY . .
 RUN GOSUMDB=off go build -o echotest ./cmd/main.go
 
 FROM golang:1.14
+USER nobody
 
 WORKDIR /app
-COPY --from=build /echotest /app/echotest 
-EXPOSE 1323/tcp
+COPY --chown=nobody:users --from=build /echotest /app/echotest 
 
+EXPOSE 1323/tcp
 CMD ["./echotest"]
