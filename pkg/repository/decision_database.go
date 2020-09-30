@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 
 	"github.com/TudorHulban/echotest/pkg/models"
 )
@@ -13,11 +14,32 @@ type DecisionDatabase interface {
 	FindAll(context.Context) (*[]models.Decision, error)
 	FindOne(context.Context, interface{}) (*models.Decision, error)
 	Create(context.Context, *models.Decision) error
-	DeleteByName(context.Context, string) error
+	DeleteByRequestID(context.Context, string) error
 }
 
 type decisionDatabase struct {
 	db DatabaseHelper
+}
+
+var currentInstance DecisionDatabase
+
+// GetInstance provides a working instance
+func GetInstance() DecisionDatabase {
+	if currentInstance == nil {
+		config := &DBConfig{DatabaseName: "decisions", DBUrl: "mongodb://localhost:27017"}
+		helper, err := NewClient(config)
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
+		err = helper.Connect()
+		if err != nil {
+			log.Fatal(" Cound not connect to mongo {} ", err.Error())
+		}
+		dbHelper := NewDatabase(config, helper)
+		currentInstance = NewDecisionDatabase(dbHelper)
+	}
+	return currentInstance
 }
 
 // NewDecisionDatabase creates a new instance
@@ -50,12 +72,9 @@ func (u *decisionDatabase) Create(ctx context.Context, decision *models.Decision
 	return err
 }
 
-func (u *decisionDatabase) DeleteByName(ctx context.Context, name string) error {
-	// In this case it is possible to use bson.M{"username":username} but I tend
-	// to avoid another dependency in this layer and for demonstration purposes
-	// used omitempty in the model
+func (u *decisionDatabase) DeleteByRequestID(ctx context.Context, requestID string) error {
 	decision := &models.Decision{
-		Name: name,
+		RequestID: requestID,
 	}
 	_, err := u.db.Collection(collectionName).DeleteOne(ctx, decision)
 	return err
