@@ -5,4 +5,5 @@ type Decision struct {
 	RequestID string
 	Name      string
 	Amount    int
+	Answer    bool
 }
