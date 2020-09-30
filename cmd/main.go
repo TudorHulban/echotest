@@ -42,10 +42,14 @@ func main() {
 	}))
 
 	e.HideBanner = true
+	addRoutes(e)
 
-	e.POST(url, HandlerPostDecisions)
-	e.GET(url, HandlerGetDecisions)
 	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func addRoutes(e *echo.Echo) {
+	e.POST(url, handlerPostDecisions)
+	e.GET(url, handlerGetDecisions)
 }
 
 func customGenerator() string {
@@ -56,7 +60,7 @@ func customGenerator() string {
 //
 // Manual test:
 // curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}' -H 'Authorization: Basic am9lOnNlY3JldA=='
-func HandlerPostDecisions(c echo.Context) error {
+func handlerPostDecisions(c echo.Context) error {
 	log.Println("Request ID:", c.Request().Header.Get(echo.HeaderXRequestID))
 
 	model := new(models.Decision)
@@ -85,7 +89,7 @@ func HandlerPostDecisions(c echo.Context) error {
 //
 // Manual test:
 // curl -X GET http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -H 'Authorization: Basic am9lOnNlY3JldA=='
-func HandlerGetDecisions(c echo.Context) error {
+func handlerGetDecisions(c echo.Context) error {
 	records, errFind := repository.GetInstance().FindAll(context.Background())
 	if errFind != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errFind.Error()})
