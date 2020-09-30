@@ -119,7 +119,7 @@ func handlerDecisionsFromDB(c echo.Context) error {
 		decisions[ix] = &v
 	}
 
-	log.Println("massaged records:", records)
+	log.Println("massaged records:", decisions)
 
 	data, errMa := json.Marshal(decisions)
 	if errMa != nil {
