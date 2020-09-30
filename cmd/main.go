@@ -43,10 +43,10 @@ func main() {
 
 	e.HideBanner = true
 	addRoutes(e)
-	err := repository.GetInstance().CheckConnection()
+	/*err := repository.GetInstance().CheckConnection()
 	if err != nil {
-		e.Logger.Fatalf("Could not connect to database {}", err.Error())
-	}
+		e.Logger.Fatalf("Could not connect to database %s", err.Error())
+	}*/
 	e.Logger.Fatal(e.Start(":1323"))
 }
 

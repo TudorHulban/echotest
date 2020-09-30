@@ -31,7 +31,7 @@ func GetInstance() DecisionDatabase {
 	mongoServer := os.Getenv("MONGO_SERVER")
 	if currentInstance == nil {
 		if mongoServer == "" {
-			mongoServer = "mongodb"
+			mongoServer = "localhost"
 		}
 		config := &DBConfig{DatabaseName: "decisions", DBUrl: fmt.Sprintf("mongodb://%s:27017", mongoServer)}
 		helper, err := NewClient(config)
