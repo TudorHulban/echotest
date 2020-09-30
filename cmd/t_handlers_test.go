@@ -42,13 +42,12 @@ func TestHandlerGet(t *testing.T) {
 	e := echo.New()
 	addRoutes(e)
 
+	// TODO: add checking of response is JSON array
 	apitest.New().
 		Handler(e).
 		Method(http.MethodGet).
-		JSON(`{"requestid":"100","name": "x", "amount":100, "answer": true}`).
 		URL(url).
 		Expect(t).
 		Status(http.StatusOK).
-		Body("").
 		End()
 }
