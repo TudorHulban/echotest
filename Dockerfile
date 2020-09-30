@@ -7,11 +7,12 @@ RUN GOSUMDB=off go mod download
 COPY . .
 RUN GOSUMDB=off go build -o echotest ./cmd/main.go
 
-FROM golang:1.14
+FROM debian:stretch-slim
 USER nobody
 
 WORKDIR /app
 COPY --chown=nobody:users --from=build /echotest /app/echotest 
 
 EXPOSE 1323/tcp
-CMD ["./echotest"]
+
+CMD ["/app/echotest/echotest"]
