@@ -41,8 +41,8 @@ func main() {
 func handlerDecisions(c echo.Context) error {
 	model := new(RequestDecision)
 
-	if errBind = c.Bind(model); errBind != nil {
-		return c.Error(errBind)
+	if errBind := c.Bind(model); errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
 	}
 
 	return c.String(http.StatusOK, "Aloha, World!")
