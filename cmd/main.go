@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -23,6 +24,16 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
+
+	// commented for easy testing
+	/* 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if subtle.ConstantTimeCompare([]byte(username), []byte("joe")) == 1 &&
+			subtle.ConstantTimeCompare([]byte(password), []byte("secret")) == 1 {
+			return true, nil
+		}
+		return false, nil
+	})) */
+
 	e.HideBanner = true
 
 	addRoutes(e)
@@ -67,9 +78,26 @@ func handlerDecisions(c echo.Context) error {
 // handlerDecisionsInDB Saves decision to database.
 //
 // Manual test:
-// curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"requestid":"100","name": "x", "amount":100, "answer": true}'
+// curl -X http://localhost:1323/api/decisions
 func handlerDecisionsFromDB(c echo.Context) error {
-	// TODO: add authentication
+	records, errFind := repository.GetInstance().FindAll(context.Background())
+	if errFind != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errFind.Error()})
+	}
 
-	return c.String(http.StatusOK, "")
+	log.Println("retrieved records:", records)
+
+	decisions := make([]*models.Decision, len(*records))
+	for ix, v := range *records {
+		decisions[ix] = &v
+	}
+
+	log.Println("massaged records:", records)
+
+	data, errMa := json.Marshal(decisions)
+	if errMa != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errMa.Error()})
+	}
+
+	return c.JSON(http.StatusOK, string(data))
 }
