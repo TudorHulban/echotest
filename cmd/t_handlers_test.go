@@ -16,7 +16,8 @@ func TestHandlerPost(t *testing.T) {
 		respBody       string
 	}{
 		{testName: "bad, amount as string", reqBody: `{"name": "x", "amount":"100"}`, statusCodeHTTP: http.StatusBadRequest, respBody: ""},
-		{testName: "should pass", reqBody: `{"name": "x", "amount":100}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": true}`},
+		{testName: "decision true", reqBody: `{"name": "x", "amount":100}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": true}`},
+		{testName: "decision false", reqBody: `{"name": "x", "amount":10001}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": false}`},
 	}
 
 	e := echo.New()
