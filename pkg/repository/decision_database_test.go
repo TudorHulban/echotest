@@ -1,70 +1,94 @@
 package repository
 
-/*
 import (
 	"context"
-	"errors"
+	"fmt"
+	"log"
 	"testing"
 
 	"github.com/TudorHulban/echotest/pkg/models"
-	"github.com/TudorHulban/echotest/pkg/repository/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/docker/go-connections/nat"
+	"github.com/stretchr/testify/suite"
+	containers "github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestFindOne(t *testing.T) {
+type TestSuite struct {
+	suite.Suite
+	mongoImage containers.Container
+	ctx        context.Context
+	database   DecisionDatabase
+}
 
-	// Define variables for interfaces
-	var dbHelper DatabaseHelper
-	var collectionHelper CollectionHelper
-	var srHelperErr SingleResultHelper
-	var srHelperCorrect SingleResultHelper
-
-	// Set interfaces implementation to mocked structures
-	dbHelper = &mock.DatabaseHelper{}
-	collectionHelper = &mocks.CollectionHelper{}
-	srHelperErr = &mocks.SingleResultHelper{}
-	srHelperCorrect = &mocks.SingleResultHelper{}
-
-	// Because interfaces does not implement mock.Mock functions we need to use
-	// type assertion to mock implemented methods
-	srHelperErr.(*mocks.SingleResultHelper).
-		On("Decode", mock.AnythingOfType("*models.Decision")).
-		Return(errors.New("mocked-error"))
-
-	srHelperCorrect.(*mocks.SingleResultHelper).
-		On("Decode", mock.AnythingOfType("*models.Decision")).
-		Return(nil).Run(func(args mock.Arguments) {
-		arg := args.Get(0).(*models.Decision)
-		arg.Username = "mocked-user"
+func (s *TestSuite) SetupSuite() {
+	var err error
+	s.ctx = context.Background()
+	req := containers.ContainerRequest{
+		Image:        "mongo",
+		ExposedPorts: []string{"27017/tcp"},
+		WaitingFor:   wait.ForHTTP("/"),
+	}
+	s.mongoImage, err = containers.GenericContainer(s.ctx, containers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
 	})
+	port, err := nat.NewPort("tcp", "27017")
+	firstMappedPort, err := s.mongoImage.MappedPort(s.ctx, port)
+	if err != nil {
+		s.Error(err)
+	}
+	config := &DBConfig{DatabaseName: "decisions_test", DBUrl: fmt.Sprintf("mongodb://localhost:%s", firstMappedPort.Port())}
+	helper, err := NewClient(config)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 
-	collectionHelper.(*mocks.CollectionHelper).
-		On("FindOne", context.Background(), bson.M{"error": true}).
-		Return(srHelperErr)
+	err = helper.Connect()
+	if err != nil {
+		log.Fatal(" Cound not connect to mongo {} ", err.Error())
+	}
+	dbHelper := NewDatabase(config, helper)
+	s.database = NewDecisionDatabase(dbHelper)
+}
 
-	collectionHelper.(*mocks.CollectionHelper).
-		On("FindOne", context.Background(), bson.M{"error": false}).
-		Return(srHelperCorrect)
+func (s *TestSuite) AfterTest(suiteName, testName string) {
+	if testName == "TestDeleteByRequestID" {
+		s.mongoImage.Terminate(s.ctx)
+	}
+}
 
-	dbHelper.(*mocks.DatabaseHelper).
-		On("Collection", "users").Return(collectionHelper)
+func TestDatabaseSuite(t *testing.T) {
+	suite.Run(t, new(TestSuite))
+}
 
-	// Create new database with mocked Database interface
-	userDba := NewDecisionDatabase(dbHelper)
+func (s *TestSuite) TestCreateAndFindOne() {
+	decision1 := &models.Decision{RequestID: "1", Name: "David", Amount: 1500, Answer: true}
+	err := s.database.Create(s.ctx, decision1)
+	s.Assert().Nil(err, "Error should be nil")
+	res, err := s.database.FindOne(s.ctx, bson.D{{"requestid", "1"}})
+	isNil := s.Assert().Nil(err, "Error should be nil")
+	if !isNil {
+		log.Fatalf("not nil!")
+	}
+	s.Assert().Equal(res.Amount, 1500, "Recorded amount should match")
+	s.Assert().Nil(s.database.DeleteByRequestID(s.ctx, "1"), "Error should be nil")
+}
 
-	// Call method with defined filter, that in our mocked function returns
-	// mocked-error
-	user, err := userDba.FindOne(context.Background(), bson.M{"error": true})
+func (s *TestSuite) TestFindAll() {
+	/*
+		decision1 := &models.Decision{RequestID: "1", Name: "David", Amount: 1500, Answer: true}
+		decision2 := &models.Decision{RequestID: "2", Name: "Gibran", Amount: 2500, Answer: false}
+		decision3 := &models.Decision{RequestID: "3", Name: "Tudor", Amount: 3500, Answer: true}
+		s.database.Create(s.ctx, decision1)
+		s.database.Create(s.ctx, decision2)
+		s.database.Create(s.ctx, decision3)
 
-	assert.Empty(t, user)
-	assert.EqualError(t, err, "mocked-error")
+		res, err := s.database.FindAll(s.ctx)
+		s.Assert().Nil(err, "Error should be nil")
+		s.Assert().True(len(*res) == 3, "There should be 3 elements") */
+}
 
-	// Now call the same function with different different filter for correct
-	// result
-	user, err = userDba.FindOne(context.Background(), bson.M{"error": false})
+func (s *TestSuite) TestDeleteByRequestID() {
 
-	assert.Equal(t, &models.Decision{Name: "mocked-user"}, user)
-	assert.NoError(t, err)
-} */
+}
