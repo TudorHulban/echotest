@@ -43,7 +43,10 @@ func main() {
 
 	e.HideBanner = true
 	addRoutes(e)
-
+	err := repository.GetInstance().CheckConnection()
+	if err != nil {
+		e.Logger.Fatalf("Could not connect to database {}", err.Error())
+	}
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
@@ -61,7 +64,6 @@ func customGenerator() string {
 // Manual test:
 // curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}' -H 'Authorization: Basic am9lOnNlY3JldA=='
 func handlerPostDecisions(c echo.Context) error {
-	log.Println("Request ID:", c.Request().Header.Get(echo.HeaderXRequestID))
 
 	model := new(models.Decision)
 

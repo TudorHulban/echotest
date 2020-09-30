@@ -17,6 +17,7 @@ type DecisionDatabase interface {
 	FindOne(context.Context, interface{}) (*models.Decision, error)
 	Create(context.Context, *models.Decision) error
 	DeleteByRequestID(context.Context, string) error
+	CheckConnection() error
 }
 
 type decisionDatabase struct {
@@ -54,6 +55,10 @@ func NewDecisionDatabase(db DatabaseHelper) DecisionDatabase {
 	return &decisionDatabase{
 		db: db,
 	}
+}
+
+func (u *decisionDatabase) CheckConnection() error {
+	return u.db.Client().Connect()
 }
 
 func (u *decisionDatabase) FindAll(ctx context.Context) (*[]models.Decision, error) {
