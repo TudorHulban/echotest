@@ -8,8 +8,8 @@ import (
 	"github.com/TudorHulban/echotest/pkg/models"
 	"github.com/TudorHulban/echotest/pkg/repository"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 const (
