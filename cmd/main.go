@@ -21,12 +21,6 @@ const (
 	mongoDBName = "decisions"
 )
 
-// RequestDecision Used to bind JSON body in handler.
-type RequestDecision struct {
-	Name   string
-	Amount int
-}
-
 func main() {
 	config := &repository.DBConfig{DatabaseName: mongoDBName, DBUrl: mongoURL}
 	helper, errRepo := repository.NewClient(config)
