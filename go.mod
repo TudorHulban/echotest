@@ -15,7 +15,9 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/testcontainers/testcontainers-go v0.9.0
 	github.com/valyala/fasttemplate v1.2.1 // indirect
+	github.com/labstack/echo/v4 v4.1.17
+	github.com/pkg/errors v0.9.1
+	github.com/steinfletcher/apitest v1.4.11
+	github.com/stretchr/testify v1.6.1
 	go.mongodb.org/mongo-driver v1.4.1
-	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
-	honnef.co/go/tools v0.0.1-2020.1.5
 )

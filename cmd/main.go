@@ -8,19 +8,13 @@ import (
 	"github.com/TudorHulban/echotest/pkg/models"
 	"github.com/TudorHulban/echotest/pkg/repository"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 const (
 	url = "/api/decisions"
 )
-
-// RequestDecision Used to bind JSON body in handler.
-type RequestDecision struct {
-	Name   string
-	Amount int
-}
 
 func main() {
 	e := echo.New()
@@ -44,9 +38,9 @@ func addRoutes(e *echo.Echo) {
 // Manual test:
 // curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}'
 func handlerDecisions(c echo.Context) error {
-	model := new(RequestDecision)
+	model := new(models.Decision)
 
-	// TODO: add validation
+	// TODO: add input validation
 
 	if errBind := c.Bind(model); errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
@@ -61,14 +55,18 @@ func handlerDecisions(c echo.Context) error {
 }
 
 // handlerDecisionsInDB Saves decision to database.
+//
+// Manual test:
+// curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"requestid":"100","name": "x", "amount":100, "answer": true}'
 func handlerDecisionsInDB(c echo.Context) error {
-	model := new(RequestDecision)
+	model := new(models.Decision)
 
 	if errBind := c.Bind(model); errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
 	}
 
-	// TODO: add request ID
+	// TODO: add authentication
+	// TODO: add request ID and decision bool
 	if errInsert := repository.GetInstance().Create(context.Background(), &models.Decision{Name: model.Name, Amount: model.Amount}); errInsert != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errInsert.Error()})
 	}

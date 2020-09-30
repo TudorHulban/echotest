@@ -19,6 +19,8 @@ const (
 
 // DecisionAmount Logic for received amount.
 func DecisionAmount(amo int) (bool, error) {
+	log.Println("decision amount:", amo)
+
 	if amo < 5000 {
 		time.Sleep(time.Duration(2) * time.Second)
 		return true, nil

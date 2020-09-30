@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/steinfletcher/apitest"
 )
 
@@ -39,5 +39,16 @@ func TestHandlerPost(t *testing.T) {
 }
 
 func TestHandlerGet(t *testing.T) {
+	e := echo.New()
+	addRoutes(e)
 
+	apitest.New().
+		Handler(e).
+		Method(http.MethodGet).
+		JSON(`{"requestid":"100","name": "x", "amount":100, "answer": true}`).
+		URL(url).
+		Expect(t).
+		Status(http.StatusOK).
+		Body("").
+		End()
 }
