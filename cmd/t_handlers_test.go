@@ -6,35 +6,35 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/steinfletcher/apitest"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestHandlerPost(t *testing.T) {
 	tt := []struct {
 		testName       string
-		httpMethod     string
-		reqURL         string
+		reqBody        string
 		statusCodeHTTP int
+		respBody       string
 	}{
-		{testName: "No Credentials", httpMethod: http.MethodPost, reqURL: "", statusCodeHTTP: http.StatusBadRequest},
+		{testName: "bad, amount as string", reqBody: `{"name": "x", "amount":"100"}`, statusCodeHTTP: http.StatusBadRequest, respBody: ""},
+		{testName: "decision true", reqBody: `{"name": "x", "amount":100}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": true}`},
+		{testName: "decision false", reqBody: `{"name": "x", "amount":10001}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": false}`},
 	}
 
-	s := echo.New()
+	e := echo.New()
+	addRoutes(e)
 
-	if assert.Nil(t, errCo) {
-		for _, tc := range tt {
-			t.Run(tc.testName, func(t *testing.T) {
-				apitest.New().
-					Handler(s.engine).
-					Method(tc.httpMethod).
-					URL(tc.reqURL).
-					FormData("usercode", tc.usercode).
-					FormData("password", tc.password).
-					Expect(t).
-					Status(tc.statusCodeHTTP).
-					End()
-			})
-		}
+	for _, tc := range tt {
+		t.Run(tc.testName, func(t *testing.T) {
+			apitest.New().
+				Handler(e).
+				Method(http.MethodPost).
+				JSON(tc.reqBody).
+				URL(url).
+				Expect(t).
+				Status(tc.statusCodeHTTP).
+				Body(tc.respBody).
+				End()
+		})
 	}
 }
 
