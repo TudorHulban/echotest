@@ -55,6 +55,9 @@ func handlerDecisions(c echo.Context) error {
 }
 
 // handlerDecisionsInDB Saves decision to database.
+//
+// Manual test:
+// curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"requestid":"100","name": "x", "amount":100, "answer": true}'
 func handlerDecisionsInDB(c echo.Context) error {
 	model := new(models.Decision)
 

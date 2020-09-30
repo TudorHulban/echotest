@@ -64,10 +64,13 @@ func (u *decisionDatabase) FindOne(ctx context.Context, filter interface{}) (*mo
 	if err != nil {
 		return nil, err
 	}
+
 	return decision, nil
 }
 
 func (u *decisionDatabase) Create(ctx context.Context, decision *models.Decision) error {
+	log.Println("adding to persistence:", *decision)
+
 	_, err := u.db.Collection(collectionName).InsertOne(ctx, decision)
 	return err
 }
@@ -76,6 +79,7 @@ func (u *decisionDatabase) DeleteByRequestID(ctx context.Context, requestID stri
 	decision := &models.Decision{
 		RequestID: requestID,
 	}
+
 	_, err := u.db.Collection(collectionName).DeleteOne(ctx, decision)
 	return err
 }
