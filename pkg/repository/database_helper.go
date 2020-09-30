@@ -115,11 +115,17 @@ func (mc *mongoCollection) FindOne(ctx context.Context, filter interface{}) Sing
 
 func (mc *mongoCollection) InsertOne(ctx context.Context, document interface{}) (interface{}, error) {
 	id, err := mc.coll.InsertOne(ctx, document)
+	if err != nil {
+		return nil, err
+	}
 	return id.InsertedID, err
 }
 
 func (mc *mongoCollection) DeleteOne(ctx context.Context, filter interface{}) (int64, error) {
 	count, err := mc.coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
 	return count.DeletedCount, err
 }
 
