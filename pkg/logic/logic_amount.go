@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"net/http"
@@ -10,11 +11,13 @@ import (
 )
 
 const (
-	url0 = "https://httpstat.us/200?sleep=50"
+	waitSeconds = 5
+
 	url1 = "https://httpstat.us/200?sleep=5000"
 	url2 = "https://httpstat.us/400?sleep=5000"
 )
 
+// DecisionAmount Logic for received amount.
 func DecisionAmount(amo int) (bool, error) {
 	if amo < 5000 {
 		time.Sleep(time.Duration(2) * time.Second)
@@ -61,10 +64,25 @@ func generateRandomNo(min, max int) int {
 func makeGETRequest(url string) (int, error) {
 	log.Println("making GET request for: ", url)
 
-	resp, errGet := http.Get(url)
-	if errGet != nil {
-		return 0, errGet
-	}
+	duration := time.Now().Add(time.Duration(waitSeconds) * time.Second)
 
-	return resp.StatusCode, nil
+	ctx, cancel := context.WithDeadline(context.Background(), duration)
+	defer cancel()
+
+	select {
+	case <-time.After(time.Duration(waitSeconds) * time.Second):
+		{
+			resp, errGet := http.Get(url)
+			if errGet != nil {
+				return 0, errGet
+			}
+
+			return resp.StatusCode, nil
+		}
+	case <-ctx.Done():
+		{
+			log.Println("timeout exceeded")
+			return 0, errors.WithMessage(errors.New("timeout exceeded"), "From select")
+		}
+	}
 }

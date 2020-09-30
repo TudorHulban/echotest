@@ -42,6 +42,8 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
+
 	e.HideBanner = true
 
 	e.POST(url, handlerDecisions)
