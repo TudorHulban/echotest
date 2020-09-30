@@ -1,9 +1,11 @@
-version: '2'
+version: '3'
 services:
     myapp:
         build: .
         container_name: "echotest"
         image: echotest/latest
+        environment:
+            - MONGO_SERVER=mongodb
         ports:
             - 1323:1323
         links:
