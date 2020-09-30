@@ -4,10 +4,20 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
+
+type Request struct {
+	Name   string
+	Amount string
+}
 
 func main() {
 	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.HideBanner = true
 
 	e.POST("/api/decisions", handlerDecisions)
 	e.GET("/api/decisions", handlerDecisionsInDB)
