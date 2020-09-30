@@ -10,7 +10,7 @@ const collectionName = "decisions"
 
 // DecisionDatabase represents the collection
 type DecisionDatabase interface {
-	FindAll(context.Context, interface{}) (*[]models.Decision, error)
+	FindAll(context.Context) (*[]models.Decision, error)
 	FindOne(context.Context, interface{}) (*models.Decision, error)
 	Create(context.Context, *models.Decision) error
 	DeleteByName(context.Context, string) error
@@ -27,9 +27,9 @@ func NewDecisionDatabase(db DatabaseHelper) DecisionDatabase {
 	}
 }
 
-func (u *decisionDatabase) FindAll(ctx context.Context, filter interface{}) (*[]models.Decision, error) {
+func (u *decisionDatabase) FindAll(ctx context.Context) (*[]models.Decision, error) {
 	var result *[]models.Decision
-	result, err := u.db.Collection(collectionName).FindAll(ctx, filter)
+	result, err := u.db.Collection(collectionName).FindAll(ctx)
 	if err != nil {
 		return nil, err
 	}

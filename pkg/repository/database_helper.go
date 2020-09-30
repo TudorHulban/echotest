@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/TudorHulban/echotest/pkg/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,7 +15,7 @@ type DatabaseHelper interface {
 }
 
 type CollectionHelper interface {
-	FindAll(context.Context, interface{}) (*[]models.Decision, error)
+	FindAll(context.Context) (*[]models.Decision, error)
 	FindOne(context.Context, interface{}) SingleResultHelper
 	InsertOne(context.Context, interface{}) (interface{}, error)
 	DeleteOne(ctx context.Context, filter interface{}) (int64, error)
@@ -94,9 +95,9 @@ func (md *mongoDatabase) Client() ClientHelper {
 	return &mongoClient{cl: client}
 }
 
-func (mc *mongoCollection) FindAll(ctx context.Context, filter interface{}) (*[]models.Decision, error) {
+func (mc *mongoCollection) FindAll(ctx context.Context) (*[]models.Decision, error) {
 	var result []models.Decision
-	cursor, err := mc.coll.Find(ctx, filter)
+	cursor, err := mc.coll.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}

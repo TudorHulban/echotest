@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	var res []models.Decision
 
 	config := &repository.DBConfig{DatabaseName: "decisions", DBUrl: "mongodb://localhost:27017"}
 	helper, err := repository.NewClient(config)
@@ -31,6 +30,6 @@ func main() {
 	dbHelper.Collection("decisions").InsertOne(ctx, decision1)
 	dbHelper.Collection("decisions").InsertOne(ctx, decision2)
 	dbHelper.Collection("decisions").InsertOne(ctx, decision3)
-	dbHelper.Collection("decisions").FindAll(ctx, &res)
+	res, err := dbHelper.Collection("decisions").FindAll(ctx)
 	fmt.Println(res)
 }
