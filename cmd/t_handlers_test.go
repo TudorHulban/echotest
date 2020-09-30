@@ -11,11 +11,12 @@ import (
 func TestHandlerPost(t *testing.T) {
 	tt := []struct {
 		testName       string
-		jsonBody       string
+		reqBody        string
 		statusCodeHTTP int
+		respBody       string
 	}{
-		{testName: "bad, amount as string", jsonBody: `{"name": "x", "amount":"100"}`, statusCodeHTTP: http.StatusBadRequest},
-		{testName: "should pass", jsonBody: `{"name": "x", "amount":100}`, statusCodeHTTP: http.StatusOK},
+		{testName: "bad, amount as string", reqBody: `{"name": "x", "amount":"100"}`, statusCodeHTTP: http.StatusBadRequest, respBody: ""},
+		{testName: "should pass", reqBody: `{"name": "x", "amount":100}`, statusCodeHTTP: http.StatusOK, respBody: `{"decision": true}`},
 	}
 
 	e := echo.New()
@@ -26,10 +27,11 @@ func TestHandlerPost(t *testing.T) {
 			apitest.New().
 				Handler(e).
 				Method(http.MethodPost).
-				JSON(tc.jsonBody).
+				JSON(tc.reqBody).
 				URL(url).
 				Expect(t).
 				Status(tc.statusCodeHTTP).
+				Body(tc.respBody).
 				End()
 		})
 	}
