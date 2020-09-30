@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -16,9 +17,7 @@ import (
 )
 
 const (
-	url         = "/api/decisions"
-	mongoURL    = "mongodb://localhost:27017"
-	mongoDBName = "decisions"
+	url = "/api/decisions"
 )
 
 // RequestDecision Used to bind JSON body in handler.
@@ -28,19 +27,6 @@ type RequestDecision struct {
 }
 
 func main() {
-	config := &repository.DBConfig{DatabaseName: mongoDBName, DBUrl: mongoURL}
-	helper, errRepo := repository.NewClient(config)
-	if errRepo != nil {
-		log.Fatal(errRepo.Error())
-	}
-
-	errCo := helper.Connect()
-	if errCo != nil {
-		log.Fatal("Cound not connect to mongo {} ", errCo.Error())
-	}
-
-	dbHandler := repository.NewDatabase(config, helper)
-	dbHandler.Client().StartSession()
 
 	e := echo.New()
 
@@ -53,18 +39,18 @@ func main() {
 	}))
 
 	// commented for easy testing
-	/* 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if subtle.ConstantTimeCompare([]byte(username), []byte("joe")) == 1 &&
 			subtle.ConstantTimeCompare([]byte(password), []byte("secret")) == 1 {
 			return true, nil
 		}
 		return false, nil
-	})) */
+	}))
 
 	e.HideBanner = true
 
-	e.POST(url, handlerDecisions)
-	e.GET(url, handlerDecisionsFromDB)
+	e.POST(url, HandlerPostDecisions)
+	e.GET(url, HandlerGetDecisions)
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
@@ -72,17 +58,16 @@ func customGenerator() string {
 	return guuid.New().String()
 }
 
-// handlerDecisions Serving POST requests.
+// HandlerPostDecisions Serving POST requests.
 //
 // Manual test:
-// curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}'
-func handlerDecisions(c echo.Context) error {
+// curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}' -H 'Authorization: Basic am9lOnNlY3JldA=='
+func HandlerPostDecisions(c echo.Context) error {
 	log.Println("Request ID:", c.Request().Header.Get(echo.HeaderXRequestID))
 
 	model := new(models.Decision)
 
-	// TODO: add validation
-
+	// TODO: add request validation
 	if errBind := c.Bind(model); errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
 	}
@@ -105,8 +90,8 @@ func handlerDecisions(c echo.Context) error {
 // handlerDecisionsInDB Saves decision to database.
 //
 // Manual test:
-// curl -X http://localhost:1323/api/decisions
-func handlerDecisionsFromDB(c echo.Context) error {
+// curl -X GET http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -H 'Authorization: Basic am9lOnNlY3JldA=='
+func HandlerGetDecisions(c echo.Context) error {
 	records, errFind := repository.GetInstance().FindAll(context.Background())
 	if errFind != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errFind.Error()})

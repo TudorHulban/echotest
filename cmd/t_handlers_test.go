@@ -21,7 +21,7 @@ func TestHandlerPost(t *testing.T) {
 	}
 
 	e := echo.New()
-	addRoutes(e)
+	e.POST(url, HandlerPostDecisions)
 
 	for _, tc := range tt {
 		t.Run(tc.testName, func(t *testing.T) {
@@ -40,7 +40,7 @@ func TestHandlerPost(t *testing.T) {
 
 func TestHandlerGet(t *testing.T) {
 	e := echo.New()
-	addRoutes(e)
+	e.GET(url, HandlerGetDecisions)
 
 	apitest.New().
 		Handler(e).
