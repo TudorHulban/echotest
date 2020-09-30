@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/TudorHulban/echotest/pkg/logic"
@@ -30,7 +31,7 @@ func main() {
 
 func addRoutes(e *echo.Echo) {
 	e.POST(url, handlerDecisions)
-	e.GET(url, handlerDecisionsInDB) // requirement not in line with CRUD
+	e.GET(url, handlerDecisionsFromDB)
 }
 
 // handlerDecisions Serving POST requests.
@@ -38,6 +39,8 @@ func addRoutes(e *echo.Echo) {
 // Manual test:
 // curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"name":"X","amount":100}'
 func handlerDecisions(c echo.Context) error {
+	log.Println("Request ID:", c.Request().Header.Get(echo.HeaderXRequestID))
+
 	model := new(models.Decision)
 
 	// TODO: add input validation
@@ -51,6 +54,13 @@ func handlerDecisions(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errDecision.Error()})
 	}
 
+	model.RequestID = "TODO:"
+	model.Answer = decision
+
+	if errInsert := repository.GetInstance().Create(context.Background(), model); errInsert != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errInsert.Error()})
+	}
+
 	return c.JSON(http.StatusOK, map[string]bool{"decision": decision})
 }
 
@@ -58,18 +68,8 @@ func handlerDecisions(c echo.Context) error {
 //
 // Manual test:
 // curl -X POST http://localhost:1323/api/decisions  -H 'Content-Type: application/json' -d '{"requestid":"100","name": "x", "amount":100, "answer": true}'
-func handlerDecisionsInDB(c echo.Context) error {
-	model := new(models.Decision)
-
-	if errBind := c.Bind(model); errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"status": errBind.Error()})
-	}
-
+func handlerDecisionsFromDB(c echo.Context) error {
 	// TODO: add authentication
-	// TODO: add request ID and decision bool
-	if errInsert := repository.GetInstance().Create(context.Background(), &models.Decision{Name: model.Name, Amount: model.Amount}); errInsert != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"status": errInsert.Error()})
-	}
 
 	return c.String(http.StatusOK, "")
 }
