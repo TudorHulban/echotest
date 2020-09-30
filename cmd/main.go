@@ -46,10 +46,14 @@ func main() {
 
 	e.HideBanner = true
 
-	e.POST(url, handlerDecisions)
-	e.GET(url, handlerDecisionsInDB)
+	addRoutes(e)
 
 	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func addRoutes(e *echo.Echo) {
+	e.POST(url, handlerDecisions)
+	e.GET(url, handlerDecisionsInDB)
 }
 
 // handlerDecisions Serving POST requests.
