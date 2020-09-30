@@ -9,11 +9,8 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
-<<<<<<< HEAD
 	github.com/steinfletcher/apitest v1.4.11
-=======
 	github.com/pkg/errors v0.9.1
->>>>>>> 5048d80be3e3f94eeeecf82c81d4536b06d39076
 	github.com/stretchr/testify v1.6.1
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.mongodb.org/mongo-driver v1.4.1
