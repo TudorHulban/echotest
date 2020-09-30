@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/TudorHulban/echotest/pkg/models"
 )
@@ -25,8 +27,12 @@ var currentInstance DecisionDatabase
 
 // GetInstance provides a working instance
 func GetInstance() DecisionDatabase {
+	mongoServer := os.Getenv("MONGO_SERVER")
 	if currentInstance == nil {
-		config := &DBConfig{DatabaseName: "decisions", DBUrl: "mongodb://localhost:27017"}
+		if mongoServer == "" {
+			mongoServer = "mongodb"
+		}
+		config := &DBConfig{DatabaseName: "decisions", DBUrl: fmt.Sprintf("mongodb://%s:27017", mongoServer)}
 		helper, err := NewClient(config)
 		if err != nil {
 			log.Fatalf(err.Error())
@@ -36,6 +42,7 @@ func GetInstance() DecisionDatabase {
 		if err != nil {
 			log.Fatal(" Cound not connect to mongo {} ", err.Error())
 		}
+		log.Println("Connected to Mongo")
 		dbHelper := NewDatabase(config, helper)
 		currentInstance = NewDecisionDatabase(dbHelper)
 	}

@@ -1,0 +1,23 @@
+version: '2'
+services:
+    myapp:
+        build: .
+        container_name: "echotest"
+        image: echotest/latest
+        ports:
+            - 1323:1323
+        links:
+            - mongodb
+        depends_on:
+            - mongodb
+    mongodb:
+        image: mongo:latest
+        container_name: "mongodb"
+        environment:
+          - MONGO_DATA_DIR=/data/db
+          - MONGO_LOG_DIR=/var/log
+        volumes:
+          - ./data/db:/data/db
+        ports:
+            - 27017:27017
+        command: mongod --bind_ip_all # --quiet
