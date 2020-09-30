@@ -20,12 +20,6 @@ const (
 	url = "/api/decisions"
 )
 
-// RequestDecision Used to bind JSON body in handler.
-type RequestDecision struct {
-	Name   string
-	Amount int
-}
-
 func main() {
 
 	e := echo.New()

@@ -26,6 +26,7 @@ func DecisionAmount(amo int) (bool, error) {
 		return true, nil
 	}
 
+	// TODO: split into easier to follow functions
 	if amo >= 5000 && amo <= 10000 {
 		random := generateRandomNo(0, 500)
 
