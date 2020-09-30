@@ -26,6 +26,7 @@ func TestHandlerPost(t *testing.T) {
 			apitest.New().
 				Handler(e).
 				Method(http.MethodPost).
+				JSON(tc.jsonBody).
 				URL(url).
 				Expect(t).
 				Status(tc.statusCodeHTTP).
