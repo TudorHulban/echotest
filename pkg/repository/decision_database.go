@@ -84,6 +84,7 @@ func (u *decisionDatabase) Create(ctx context.Context, decision *models.Decision
 	log.Println("adding to persistence:", *decision)
 
 	_, err := u.db.Collection(collectionName).InsertOne(ctx, decision)
+	log.Println("added to persistence:", *decision)
 	return err
 }
 

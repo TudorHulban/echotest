@@ -4,13 +4,12 @@ import (
 	"context"
 	"crypto/subtle"
 	"encoding/json"
-	"log"
-	"net/http"
-
 	"github.com/TudorHulban/echotest/pkg/logic"
 	"github.com/TudorHulban/echotest/pkg/models"
 	"github.com/TudorHulban/echotest/pkg/repository"
 	guuid "github.com/google/uuid"
+	"log"
+	"net/http"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -32,16 +31,27 @@ func main() {
 		},
 	}))
 
-	// commented for easy testing
-	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if subtle.ConstantTimeCompare([]byte(username), []byte("joe")) == 1 &&
-			subtle.ConstantTimeCompare([]byte(password), []byte("secret")) == 1 {
-			return true, nil
-		}
-		return false, nil
+	e.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
+		Skipper:   func(c echo.Context) bool{
+			log.Println("Checking skipper")
+			if c.Request().Method == echo.OPTIONS {
+				log.Println("OPTIONS, skipping auth")
+				return true
+			}
+			return false
+		},
+		Validator: func(username, password string, c echo.Context) (bool, error) {
+			log.Println("Validating ", c.Request().Method)
+			if subtle.ConstantTimeCompare([]byte(username), []byte("joe")) == 1 &&
+				subtle.ConstantTimeCompare([]byte(password), []byte("secret")) == 1 {
+				return true, nil
+			}
+			return false, nil
+		},
 	}))
 
 	e.HideBanner = true
+	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	addRoutes(e)
 	/*err := repository.GetInstance().CheckConnection()
 	if err != nil {
@@ -51,6 +61,7 @@ func main() {
 }
 
 func addRoutes(e *echo.Echo) {
+	//e.OPTIONS(url, handlerOptions)
 	e.POST(url, handlerPostDecisions)
 	e.GET(url, handlerGetDecisions)
 }
